@@ -65,10 +65,51 @@ translation = {'UUU': 'Phe',
 'GGA': 'Gly',
 'GGG': 'Gly'}
 
-def RNA_to_AA(codon):
-    
+# Get a list of all codons
+codons = list(translation.keys())
+
+##################################################################
+
+
+def RNA_to_AA(numeric_columns):
+
     """
     Translate an RNA codon to its corresponding amino acid
     """
 
     return translation[codon]
+
+
+####################################################################
+
+def get_AA(df, columns = codons):
+    
+    """
+    Produce new columns representing amino acid frequency for each observation.
+    
+    Inputs: 
+    df - Dataframe containing codon frequencies that we wish get amino acid frequencies for
+    columns - A list of column labels representing codons
+    
+    Output: 
+    
+    A new dataframe containing both the codon frequencies and the amino acid frequencies
+    
+    """
+
+    # Append 'SpeciesName' to the columns list
+    
+    columns.append('SpeciesName')
+    
+    # Build a new dataframe with the where the columns are labelled by the amino acid they represent 
+    # rather than the codon they represent
+    df_AA = df[columns].rename(translation,
+                     axis = 1)
+    
+    # Group columns representing the same amino acid by their sums
+    df_AA = df_AA.groupby(lambda x: x,
+                         axis = 1).sum()
+    # Merge df_AA with df
+    df = df.merge(df_AA,
+            on = 'SpeciesName')
+    return df
